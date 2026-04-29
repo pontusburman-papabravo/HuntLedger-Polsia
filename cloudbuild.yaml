@@ -10,7 +10,8 @@ steps:
     args:
       - '-c'
       - |
-        gcloud builds submit --tag europe-north1-docker.pkg.dev/$PROJECT_ID/huntledger-repo/api ./apps/api
+        # Vi använder '.' för att skicka med hela projektet (inkl. tsconfig.base.json)
+        gcloud builds submit --tag europe-north1-docker.pkg.dev/$PROJECT_ID/huntledger-repo/api . --dockerfile=apps/api/Dockerfile
         gcloud run deploy huntledger-api --image europe-north1-docker.pkg.dev/$PROJECT_ID/huntledger-repo/api --region europe-north1 --platform managed --allow-unauthenticated
 
   # 3. Build and deploy Frontend (Web)
@@ -20,9 +21,9 @@ steps:
       - '-c'
       - |
         BACKEND_URL=$(gcloud run services describe huntledger-api --region europe-north1 --format='value(status.url)')
-        gcloud builds submit --tag europe-north1-docker.pkg.dev/$PROJECT_ID/huntledger-repo/web --set-env-vars "VITE_API_URL=$$BACKEND_URL" ./apps/web
+        # Samma här: skicka roten (.) men använd web-mappens Dockerfile
+        gcloud builds submit --tag europe-north1-docker.pkg.dev/$PROJECT_ID/huntledger-repo/web --set-env-vars "VITE_API_URL=$$BACKEND_URL" . --dockerfile=apps/web/Dockerfile
         gcloud run deploy huntledger-web --image europe-north1-docker.pkg.dev/$PROJECT_ID/huntledger-repo/web --region europe-north1 --platform managed --allow-unauthenticated
 
-# THIS SECTION FIXES THE ERROR
 options:
   logging: CLOUD_LOGGING_ONLY
