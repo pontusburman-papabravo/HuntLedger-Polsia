@@ -13,7 +13,20 @@ services:
         value: 0.0.0.0
       - key: NODE_VERSION
         value: '20'
-      # Sätts manuellt i Polsia/Render UI:
-      # - DATABASE_URL          (Postgres connection string)
-      # - JWT_SECRET            (slumpmässig 64-tecken sträng)
+      # Build-time: Vite läser denna när frontend byggs. Utan den
+      # tree-shakar Vite bort ApiAuthAdapter/ApiDataAdapter och appen
+      # kör mot localStorage istället för att tala med backend.
+      - key: VITE_USE_BACKEND
+        value: 'true'
+      # Runtime: bas-URL för password-reset-mailens länkar.
+      # Måste vara den publika domänen som användarna ser appen på.
+      - key: APP_BASE_URL
+        value: 'https://huntledger.se'
+      # Sätts manuellt i Polsia/Render UI (befintliga värden behålls
+      # vid deploy — deploy-tasken byter bara ut kod, inte env-config):
+      # - DATABASE_URL          (Postgres connection string, Neon)
+      # - JWT_SECRET            (slumpmässig 64-tecken sträng — krävs!)
+      # - SMTP_HOST, SMTP_USER, SMTP_PASS  (för password-reset email)
+      # - SMTP_PORT             (valfri, default 587)
+      # - SMTP_FROM             (valfri, default noreply@huntledger.se)
       # - POLSIA_ANALYTICS_SLUG (valfri, default 'huntlog')
