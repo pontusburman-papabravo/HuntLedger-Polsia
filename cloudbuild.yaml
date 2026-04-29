@@ -19,16 +19,17 @@ steps:
       - '--platform=managed'
       - '--allow-unauthenticated'
 
-  # 4. Bygg Frontend-image (Här hämtar vi API-URL:en först)
+  # 4. Bygg Frontend-image
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
+        # Notera $$ här för att bash ska hantera variabeln
         BACKEND_URL=$(gcloud run services describe huntledger-api --region=europe-north1 --format='value(status.url)')
         docker build \
           -t europe-north1-docker.pkg.dev/$PROJECT_ID/huntledger-repo/web \
-          --build-arg VITE_API_URL=$BACKEND_URL \
+          --build-arg VITE_API_URL=$$BACKEND_URL \
           -f apps/web/Dockerfile .
 
   # 5. Push Frontend-image
