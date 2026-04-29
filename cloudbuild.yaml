@@ -10,9 +10,17 @@ steps:
     args:
       - '-c'
       - |
-        # Vi lägger till --logging=cloud för att det inre bygget ska lyckas
-        gcloud builds submit --tag europe-north1-docker.pkg.dev/$PROJECT_ID/huntledger-repo/api . --dockerfile=apps/api/Dockerfile --logging=cloud
-        gcloud run deploy huntledger-api --image europe-north1-docker.pkg.dev/$PROJECT_ID/huntledger-repo/api --region europe-north1 --platform managed --allow-unauthenticated
+        # Vi använder --dockerfile och ser till att sökvägen är korrekt
+        gcloud builds submit . \
+          --tag europe-north1-docker.pkg.dev/$PROJECT_ID/huntledger-repo/api \
+          --dockerfile=apps/api/Dockerfile \
+          --logging=cloud
+        
+        gcloud run deploy huntledger-api \
+          --image europe-north1-docker.pkg.dev/$PROJECT_ID/huntledger-repo/api \
+          --region europe-north1 \
+          --platform managed \
+          --allow-unauthenticated
 
   # 3. Build and deploy Frontend (Web)
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -21,9 +29,18 @@ steps:
       - '-c'
       - |
         BACKEND_URL=$(gcloud run services describe huntledger-api --region europe-north1 --format='value(status.url)')
-        # Vi lägger till --logging=cloud även här
-        gcloud builds submit --tag europe-north1-docker.pkg.dev/$PROJECT_ID/huntledger-repo/web --set-env-vars "VITE_API_URL=$$BACKEND_URL" . --dockerfile=apps/web/Dockerfile --logging=cloud
-        gcloud run deploy huntledger-web --image europe-north1-docker.pkg.dev/$PROJECT_ID/huntledger-repo/web --region europe-north1 --platform managed --allow-unauthenticated
+        
+        gcloud builds submit . \
+          --tag europe-north1-docker.pkg.dev/$PROJECT_ID/huntledger-repo/web \
+          --set-env-vars "VITE_API_URL=$$BACKEND_URL" \
+          --dockerfile=apps/web/Dockerfile \
+          --logging=cloud
+          
+        gcloud run deploy huntledger-web \
+          --image europe-north1-docker.pkg.dev/$PROJECT_ID/huntledger-repo/web \
+          --region europe-north1 \
+          --platform managed \
+          --allow-unauthenticated
 
 options:
   logging: CLOUD_LOGGING_ONLY
