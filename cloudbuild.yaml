@@ -1,10 +1,10 @@
 steps:
-  # 1. Installera allt från roten (Viktigt för att hitta @huntledger/shared)
+  # 1. Install dependencies from root
   - name: 'node:20'
     entrypoint: npm
     args: ['install', '--legacy-peer-deps']
 
-  # 2. Bygg och rulla ut Backend (API)
+  # 2. Build and deploy Backend (API)
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
@@ -13,7 +13,7 @@ steps:
         gcloud builds submit --tag europe-north1-docker.pkg.dev/$PROJECT_ID/huntledger-repo/api ./apps/api
         gcloud run deploy huntledger-api --image europe-north1-docker.pkg.dev/$PROJECT_ID/huntledger-repo/api --region europe-north1 --platform managed --allow-unauthenticated
 
-  # 3. Bygg och rulla ut Frontend (Web)
+  # 3. Build and deploy Frontend (Web)
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
@@ -22,3 +22,7 @@ steps:
         BACKEND_URL=$(gcloud run services describe huntledger-api --region europe-north1 --format='value(status.url)')
         gcloud builds submit --tag europe-north1-docker.pkg.dev/$PROJECT_ID/huntledger-repo/web --set-env-vars "VITE_API_URL=$$BACKEND_URL" ./apps/web
         gcloud run deploy huntledger-web --image europe-north1-docker.pkg.dev/$PROJECT_ID/huntledger-repo/web --region europe-north1 --platform managed --allow-unauthenticated
+
+# THIS SECTION FIXES THE ERROR
+options:
+  logging: CLOUD_LOGGING_ONLY
