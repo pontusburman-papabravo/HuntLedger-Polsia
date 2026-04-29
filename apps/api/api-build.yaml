@@ -1,0 +1,7 @@
+cat <<EOF > ~/HuntLedger-Polsia/apps/api/api-build.yaml
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'europe-north1-docker.pkg.dev/\$PROJECT_ID/huntledger-repo/api', '-f', 'apps/api/Dockerfile', '.']
+images:
+  - 'europe-north1-docker.pkg.dev/\$PROJECT_ID/huntledger-repo/api'
+EOF
