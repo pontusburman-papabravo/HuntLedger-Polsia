@@ -1,0 +1,19 @@
+services:
+  - type: web
+    runtime: node
+    name: huntledger
+    plan: free
+    buildCommand: npm install --include=dev --legacy-peer-deps && npm run build
+    startCommand: node _serve.mjs
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: HOST
+        value: 0.0.0.0
+      - key: NODE_VERSION
+        value: '20'
+      # Sätts manuellt i Polsia/Render UI:
+      # - DATABASE_URL          (Postgres connection string)
+      # - JWT_SECRET            (slumpmässig 64-tecken sträng)
+      # - POLSIA_ANALYTICS_SLUG (valfri, default 'huntlog')
