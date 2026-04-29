@@ -10,11 +10,13 @@ steps:
     args:
       - '-c'
       - |
-        gcloud builds submit . \
+        # Vi sätter flaggorna FÖRE punkten
+        gcloud builds submit \
           --tag=europe-north1-docker.pkg.dev/$PROJECT_ID/huntledger-repo/api \
           --dockerfile=apps/api/Dockerfile \
           --logging=cloud \
-          --quiet
+          --quiet \
+          .
         
         gcloud run deploy huntledger-api \
           --image=europe-north1-docker.pkg.dev/$PROJECT_ID/huntledger-repo/api \
@@ -31,12 +33,13 @@ steps:
       - |
         BACKEND_URL=$(gcloud run services describe huntledger-api --region=europe-north1 --format='value(status.url)')
         
-        gcloud builds submit . \
+        gcloud builds submit \
           --tag=europe-north1-docker.pkg.dev/$PROJECT_ID/huntledger-repo/web \
           --set-env-vars="VITE_API_URL=$$BACKEND_URL" \
           --dockerfile=apps/web/Dockerfile \
           --logging=cloud \
-          --quiet
+          --quiet \
+          .
           
         gcloud run deploy huntledger-web \
           --image=europe-north1-docker.pkg.dev/$PROJECT_ID/huntledger-repo/web \
