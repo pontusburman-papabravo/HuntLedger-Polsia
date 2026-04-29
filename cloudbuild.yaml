@@ -10,7 +10,6 @@ steps:
     args:
       - '-c'
       - |
-        # Vi sätter flaggorna FÖRE punkten
         gcloud builds submit \
           --tag=europe-north1-docker.pkg.dev/$PROJECT_ID/huntledger-repo/api \
           --dockerfile=apps/api/Dockerfile \
