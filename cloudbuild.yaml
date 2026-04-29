@@ -1,14 +1,17 @@
 steps:
   # 1. Bygg Backend-image
   - name: 'gcr.io/cloud-builders/docker'
+    id: 'build-backend'
     args: ['build', '-t', 'europe-north1-docker.pkg.dev/$PROJECT_ID/huntledger-repo/api', '-f', 'apps/api/Dockerfile', '.']
 
   # 2. Push Backend-image
   - name: 'gcr.io/cloud-builders/docker'
+    id: 'push-backend'
     args: ['push', 'europe-north1-docker.pkg.dev/$PROJECT_ID/huntledger-repo/api']
 
   # 3. Deploy Backend till Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'deploy-backend'
     entrypoint: 'gcloud'
     args:
       - 'run'
@@ -18,26 +21,34 @@ steps:
       - '--region=europe-north1'
       - '--platform=managed'
       - '--allow-unauthenticated'
+      - '--quiet'
 
-  # 4. Bygg Frontend-image
+  # 4. Hämta URL och bygg Frontend (Vi använder docker-imagen direkt för att undvika 'gcloud' inuti 'gcloud')
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'build-frontend'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
-        # Notera $$ här för att bash ska hantera variabeln
+        # Vi använder Cloud Builds inbyggda nätverk för att nå Docker
         BACKEND_URL=$(gcloud run services describe huntledger-api --region=europe-north1 --format='value(status.url)')
-        docker build \
+        echo "Bygger frontend med API-URL: $$BACKEND_URL"
+        
+        # Istället för gcloud submit, kör vi docker build direkt här
+        # Cloud Build-miljön har faktiskt docker monterat i /usr/bin/docker
+        /usr/bin/docker build \
           -t europe-north1-docker.pkg.dev/$PROJECT_ID/huntledger-repo/web \
           --build-arg VITE_API_URL=$$BACKEND_URL \
           -f apps/web/Dockerfile .
 
   # 5. Push Frontend-image
   - name: 'gcr.io/cloud-builders/docker'
+    id: 'push-frontend'
     args: ['push', 'europe-north1-docker.pkg.dev/$PROJECT_ID/huntledger-repo/web']
 
   # 6. Deploy Frontend till Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'deploy-frontend'
     entrypoint: 'gcloud'
     args:
       - 'run'
@@ -47,6 +58,7 @@ steps:
       - '--region=europe-north1'
       - '--platform=managed'
       - '--allow-unauthenticated'
+      - '--quiet'
 
 options:
   logging: CLOUD_LOGGING_ONLY
