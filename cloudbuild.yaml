@@ -10,17 +10,18 @@ steps:
     args:
       - '-c'
       - |
-        # Vi använder --dockerfile och ser till att sökvägen är korrekt
         gcloud builds submit . \
-          --tag europe-north1-docker.pkg.dev/$PROJECT_ID/huntledger-repo/api \
+          --tag=europe-north1-docker.pkg.dev/$PROJECT_ID/huntledger-repo/api \
           --dockerfile=apps/api/Dockerfile \
-          --logging=cloud
+          --logging=cloud \
+          --quiet
         
         gcloud run deploy huntledger-api \
-          --image europe-north1-docker.pkg.dev/$PROJECT_ID/huntledger-repo/api \
-          --region europe-north1 \
-          --platform managed \
-          --allow-unauthenticated
+          --image=europe-north1-docker.pkg.dev/$PROJECT_ID/huntledger-repo/api \
+          --region=europe-north1 \
+          --platform=managed \
+          --allow-unauthenticated \
+          --quiet
 
   # 3. Build and deploy Frontend (Web)
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -28,19 +29,21 @@ steps:
     args:
       - '-c'
       - |
-        BACKEND_URL=$(gcloud run services describe huntledger-api --region europe-north1 --format='value(status.url)')
+        BACKEND_URL=$(gcloud run services describe huntledger-api --region=europe-north1 --format='value(status.url)')
         
         gcloud builds submit . \
-          --tag europe-north1-docker.pkg.dev/$PROJECT_ID/huntledger-repo/web \
-          --set-env-vars "VITE_API_URL=$$BACKEND_URL" \
+          --tag=europe-north1-docker.pkg.dev/$PROJECT_ID/huntledger-repo/web \
+          --set-env-vars="VITE_API_URL=$$BACKEND_URL" \
           --dockerfile=apps/web/Dockerfile \
-          --logging=cloud
+          --logging=cloud \
+          --quiet
           
         gcloud run deploy huntledger-web \
-          --image europe-north1-docker.pkg.dev/$PROJECT_ID/huntledger-repo/web \
-          --region europe-north1 \
-          --platform managed \
-          --allow-unauthenticated
+          --image=europe-north1-docker.pkg.dev/$PROJECT_ID/huntledger-repo/web \
+          --region=europe-north1 \
+          --platform=managed \
+          --allow-unauthenticated \
+          --quiet
 
 options:
   logging: CLOUD_LOGGING_ONLY
