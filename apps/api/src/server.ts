@@ -11,8 +11,10 @@ import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import { registerRoutes } from './routes/index.js';
 
-const PORT = Number(process.env.PORT ?? 3001);
-const HOST = process.env.HOST ?? '127.0.0.1';
+// Ändrat: Standardport för Cloud Run är 8080
+const PORT = Number(process.env.PORT ?? 8080);
+// Ändrat: Måste vara 0.0.0.0 för att acceptera trafik utifrån i en container
+const HOST = process.env.HOST ?? '0.0.0.0';
 const CORS_ORIGIN = process.env.CORS_ORIGIN ?? 'http://localhost:5173';
 
 async function main() {
